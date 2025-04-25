@@ -27,26 +27,7 @@ def salvar_reserva():
         entry_horario.delete(0, tk.END)
 
     except ValueError:
-         messagebox.showerror("Erro", "Formato de data/hora inválido. Use dd/mm/aaaa hh:mm")
-
-root = tk.Tk()
-root.title("Ph B2B Notifier")
-
-tk.Label(root, text = "CNPJ").pack()
-entry_pj = tk.Entry(root, width=50)
-entry_pj.pack()
-
-tk.Label(root, text="Razão Social").pack()
-entry_razao_social = tk.Entry(root, width=50)
-entry_razao_social.pack()
-
-tk.Label(root, text="Horário da Reserva (dd/mm/aaaa hh:mm)").pack()
-entry_horario = tk.Entry(root, width=50)
-entry_horario.pack()
-
-tk.Button(root, text="Salvar Reserva", command=salvar_reserva).pack(pady=10)
-
-root.mainloop()
+        messagebox.showerror("Erro", "Formato de data/hora inválido. Use dd/mm/aaaa hh:mm")
 
 def verificar_reservas():
     while True:
@@ -66,11 +47,31 @@ def verificar_reservas():
                 if reserva["horario"] == agora:
                     mensagem = f"Reserva B2B para {reserva['razao_social']}:\n{reserva['pj']}"
                     messagebox.showinfo("Notificação de Reserva", mensagem)
-                horario_reserva = datetime.strptime(reserva["horario"], "%d/%m/%Y %H:%M")
                 
         except Exception as e:
-            print(f"ERRO {e}")
+            print(f"[ERRO] {e}")
 
         time.sleep(30)
 
+# Inicia thread de verificação antes do mainloop
 threading.Thread(target=verificar_reservas, daemon=True).start()
+
+# Interface gráfica
+root = tk.Tk()
+root.title("Ph B2B Notifier")
+
+tk.Label(root, text = "CNPJ").pack()
+entry_pj = tk.Entry(root, width=50)
+entry_pj.pack()
+
+tk.Label(root, text="Razão Social").pack()
+entry_razao_social = tk.Entry(root, width=50)
+entry_razao_social.pack()
+
+tk.Label(root, text="Horário da Reserva (dd/mm/aaaa hh:mm)").pack()
+entry_horario = tk.Entry(root, width=50)
+entry_horario.pack()
+
+tk.Button(root, text="Salvar Reserva", command=salvar_reserva).pack(pady=10)
+
+root.mainloop()

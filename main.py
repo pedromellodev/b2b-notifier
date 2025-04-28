@@ -21,7 +21,7 @@ def salvar_reserva():
         with open("reservas.json", "a") as f:
             f.write(json.dumps(reserva) + "\n")
 
-        messagebox.showinfo("Salvo", "Reserva salva com sucesso!")
+        messagebox.showinfo("Sucesso", "Reserva salva com sucesso!")
         entry_pj.delete(0, tk.END)
         entry_razao_social.delete(0, tk.END)
         entry_horario.delete(0, tk.END)
@@ -42,10 +42,10 @@ def verificar_reservas():
                 if not linha.strip():
                     continue
                 reserva = json.loads(linha)
-                print(f"[DEBUG] Comparando com reserva:{reserva['horario']}")
+                print(f"[DEBUG] Comparando com reserva: {reserva['horario']}")
                 
                 if reserva["horario"] == agora:
-                    mensagem = f"Reserva B2B para {reserva['razao_social']}:\n{reserva['pj']}"
+                    mensagem = f"A reserva B2B {reserva['razao_social']}:\n{reserva['pj']} caiu."
                     messagebox.showinfo("Notificação de Reserva", mensagem)
                 
         except Exception as e:
@@ -53,25 +53,47 @@ def verificar_reservas():
 
         time.sleep(30)
 
-# Inicia thread de verificação antes do mainloop
+# Comando para iniciar a Thread
 threading.Thread(target=verificar_reservas, daemon=True).start()
 
-# Interface gráfica
+import tkinter as tk
+from tkinter import messagebox
+
 root = tk.Tk()
 root.title("Ph B2B Notifier")
+root.configure(bg="#1f1f1f")
 
-tk.Label(root, text = "CNPJ").pack()
-entry_pj = tk.Entry(root, width=50)
-entry_pj.pack()
+largura_janela = 400
+altura_janela = 400
+largura_tela = root.winfo_screenwidth()
+altura_tela = root.winfo_screenheight()
+pos_x = (largura_tela // 2) - (largura_janela // 2)
+pos_y = (altura_tela // 2) - (altura_janela // 2)
+root.geometry(f"{largura_janela}x{altura_janela}+{pos_x}+{pos_y}")
+root.resizable(False, False)
 
-tk.Label(root, text="Razão Social").pack()
-entry_razao_social = tk.Entry(root, width=50)
-entry_razao_social.pack()
+fonte_padrao = ("Helvetica", 12)
+cor_texto = "white"
+cor_campo = "#2c2c2c" 
+cor_botao = "#4CAF50" 
 
-tk.Label(root, text="Horário da Reserva (dd/mm/aaaa hh:mm)").pack()
-entry_horario = tk.Entry(root, width=50)
-entry_horario.pack()
+def criar_entry():
+    entry = tk.Entry(root, font=fonte_padrao, width=40, bg=cor_campo, fg=cor_texto, insertbackground="white", bd=0, highlightthickness=1, highlightbackground="#555")
+    return entry
 
-tk.Button(root, text="Salvar Reserva", command=salvar_reserva).pack(pady=10)
+tk.Label(root, text="CNPJ", font=fonte_padrao, bg="#1f1f1f", fg=cor_texto).pack(pady=(20,5))
+entry_pj = criar_entry()
+entry_pj.pack(pady=5)
+
+tk.Label(root, text="Razão Social", font=fonte_padrao, bg="#1f1f1f", fg=cor_texto).pack(pady=(10,5))
+entry_razao_social = criar_entry()
+entry_razao_social.pack(pady=5)
+
+tk.Label(root, text="Horário da Reserva (dd/mm/aaaa hh:mm)", font=fonte_padrao, bg="#1f1f1f", fg=cor_texto).pack(pady=(10,5))
+entry_horario = criar_entry()
+entry_horario.pack(pady=5)
+
+btn_salvar = tk.Button(root, text="Salvar Reserva", font=fonte_padrao, bg=cor_botao, fg="white", width=20, height=2, bd=0, activebackground="#45a049", cursor="hand2", relief="flat", command=salvar_reserva)
+btn_salvar.pack(pady=20)
 
 root.mainloop()

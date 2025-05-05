@@ -4,6 +4,8 @@ import json
 from datetime import datetime
 import threading
 import time
+from PIL import Image, ImageTk
+
 
 def salvar_reserva():
     pj = entry_pj.get()
@@ -60,6 +62,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 root = tk.Tk()
+root.iconbitmap("logo.ico")
 root.title("Ph B2B Notifier")
 root.configure(bg="#1f1f1f")
 
@@ -76,6 +79,13 @@ fonte_padrao = ("Helvetica", 12)
 cor_texto = "white"
 cor_campo = "#2c2c2c" 
 cor_botao = "#4CAF50" 
+
+logo_image = Image.open("logo.png")
+logo_image = logo_image.resize((70, 70))  
+logo_tk = ImageTk.PhotoImage(logo_image)
+label_logo = tk.Label(root, image=logo_tk, bg="#1e1e1e")  
+label_logo.pack(pady=10)
+
 
 def criar_entry():
     entry = tk.Entry(root, font=fonte_padrao, width=40, bg=cor_campo, fg=cor_texto, insertbackground="white", bd=0, highlightthickness=1, highlightbackground="#555")

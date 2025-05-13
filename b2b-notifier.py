@@ -5,7 +5,12 @@ from datetime import datetime
 import threading
 import time
 from PIL import Image, ImageTk
+import os
+import sys
 
+pasta_base = os.path.dirname(sys.executable)
+caminho_logo = os.path.join(pasta_base, "logo.png")
+caminho_reservas = os.path.join(pasta_base, "reservas.json")
 
 def salvar_reserva():
     pj = entry_pj.get()
@@ -20,7 +25,7 @@ def salvar_reserva():
             "horario": horario
         }
 
-        with open("reservas.json", "a") as f:
+        with open(caminho_reservas, "a") as f:
             f.write(json.dumps(reserva) + "\n")
 
         messagebox.showinfo("Sucesso", "Reserva salva com sucesso!")
@@ -34,8 +39,13 @@ def salvar_reserva():
 def verificar_reservas():
     while True:
         try:
-            with open("reservas.json", "r") as f:
-                linhas = f.readlines()
+            try:
+                with open(caminho_reservas, "r") as f:
+                    linhas = f.readlines()
+            except FileNotFoundError:
+                # Se o arquivo não existir na primeira vez, crie-o vazio
+                open(caminho_reservas, "w").close()
+                linhas = []
 
             agora = datetime.now().strftime("%d/%m/%Y %H:%M")
             print(f"[DEBUG] Verificando reserva às {agora}...")
@@ -45,11 +55,11 @@ def verificar_reservas():
                     continue
                 reserva = json.loads(linha)
                 print(f"[DEBUG] Comparando com reserva: {reserva['horario']}")
-                
+
                 if reserva["horario"] == agora:
                     mensagem = f"A reserva B2B {reserva['razao_social']}:\n{reserva['pj']} caiu."
                     messagebox.showinfo("Notificação de Reserva", mensagem)
-                
+
         except Exception as e:
             print(f"[ERRO] {e}")
 
@@ -58,11 +68,11 @@ def verificar_reservas():
 # Comando para iniciar a Thread
 threading.Thread(target=verificar_reservas, daemon=True).start()
 
-import tkinter as tk
-from tkinter import messagebox
-
 root = tk.Tk()
-root.iconbitmap("logo.ico")
+try:
+    root.iconbitmap("logo.ico")
+except tk.TclError:
+    print("Aviso: Arquivo 'logo.ico' não encontrado.")
 root.title("Ph B2B Notifier")
 root.configure(bg="#1f1f1f")
 
@@ -77,14 +87,19 @@ root.resizable(False, False)
 
 fonte_padrao = ("Helvetica", 12)
 cor_texto = "white"
-cor_campo = "#2c2c2c" 
-cor_botao = "#4CAF50" 
+cor_campo = "#2c2c2c"
+cor_botao = "#4CAF50"
 
-logo_image = Image.open("logo.png")
-logo_image = logo_image.resize((70, 70))  
-logo_tk = ImageTk.PhotoImage(logo_image)
-label_logo = tk.Label(root, image=logo_tk, bg="#1e1e1e")  
-label_logo.pack(pady=10)
+try:
+    logo_image = Image.open(caminho_logo)
+    logo_image = logo_image.resize((70, 70))
+    logo_tk = ImageTk.PhotoImage(logo_image)
+    label_logo = tk.Label(root, image=logo_tk, bg="#1e1e1e")
+    label_logo.pack(pady=10)
+except FileNotFoundError:
+    print(f"Erro: Arquivo '{caminho_logo}' não encontrado.")
+    label_logo = tk.Label(root, text="B2B Notifier", font=fonte_padrao, bg="#1e1e1e", fg="white")
+    label_logo.pack(pady=10)
 
 
 def criar_entry():
